@@ -1,0 +1,7 @@
+https://github.com/davechristian/Simple-SSD-Stereo/blob/main/stereomatch_SSD.py
+https://johnwlambert.github.io/stereo/
+https://mccormickml.com/assets/StereoVision/Stereo%20Vision%20-%20Mathworks%20Example%20Article.pdf
+https://mccormickml.com/2014/01/10/stereo-vision-tutorial-part-i/
+https://github.com/ChristianOrr/semi-global-matching-numpy?tab=readme-ov-file
+https://github.com/ChristianOrr/semi-global-matching-numpy/blob/master/sgm_numpy_notebook.ipynb
+https://core.ac.uk/download/pdf/11134866.pdf
