@@ -48,7 +48,7 @@ for y in tqdm(range(kernel_half, h - kernel_half)):
             denom = errors[best_offset - 1] + errors[best_offset + 1] - 2 * errors[best_offset]
             if denom != 0:
                 subpixel_offset = (errors[best_offset - 1] - errors[best_offset + 1]) / (2 * denom)
-                best_offset = best_offset + subpixel_offset
+                best_offset += subpixel_offset
         
         disp_map[y, x] = best_offset * offset_adjust
 
