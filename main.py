@@ -39,4 +39,4 @@ print(f"Computation time: {end-start:.2f}s")
 print(f"Metrics: {compute_metrics(np.array(gt), disparity)}")
 
 save_point_cloud(f"{args.method}.ply", disparity, colors)
-plt.savefig(f"{args.method}.png")
+plt.imsave(f"{args.method}.png", disparity, cmap='jet')
