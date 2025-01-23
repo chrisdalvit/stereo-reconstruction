@@ -30,7 +30,7 @@ class BM:
         h, w = left.shape
         disp_map = np.zeros_like(left, dtype=np.float32)
         for y in range(self.kernel_half, h - self.kernel_half):      
-            for x in range(self.kernel_half, w - self.kernel_half):
+            for x in range(self.max_disparity, w - self.kernel_half):
                 best_offset = None
                 min_error = float("inf")
                 errors = []
@@ -48,7 +48,4 @@ class BM:
                 if self.subpixel_interpolation:
                     best_offset += self._compute_subpixel_offset(best_offset, errors)
                 disp_map[y, x] = best_offset * self.offset_adjust
-                
-        if self.masking:
-            disp_map[:,:self.max_disparity] = 0 
         return disp_map
