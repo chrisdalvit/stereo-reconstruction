@@ -1,14 +1,16 @@
+import ctypes
+import pathlib
 import numpy as np
 
 class BM:
     
-    def __init__(self, kernel_size, max_disparity, subpixel_interpolation, masking=True):
+    def __init__(self, kernel_size, max_disparity, subpixel_interpolation, language):
         self.kernel_size = kernel_size
         self.max_disparity = max_disparity
         self.kernel_half = self.kernel_size // 2
         self.offset_adjust = 255 / self.max_disparity  # this is used to map depth map output to 0-255 range
-        self.masking = masking
         self.subpixel_interpolation = subpixel_interpolation
+        self.language = language
         
     def _get_window(self, y, x, img, offset=0):
         y_start = y-self.kernel_half
@@ -26,7 +28,7 @@ class BM:
                 return subpixel_offset
         return 0.0
     
-    def compute(self, left, right):
+    def compute_python(self, left, right):
         h, w = left.shape
         disp_map = np.zeros_like(left, dtype=np.float32)
         for y in range(self.kernel_half, h - self.kernel_half):      
@@ -49,3 +51,35 @@ class BM:
                     best_offset += self._compute_subpixel_offset(best_offset, errors)
                 disp_map[y, x] = best_offset * self.offset_adjust
         return disp_map
+    
+    def compute(self, left, right):
+        if self.language == "python":
+            return self.compute_python(left, right)
+        elif self.language == "c":
+            left = np.double(left)
+            right = np.double(right)
+            output = np.double(np.ones_like(left))
+            # Load the shared library into ctypes
+            libname = pathlib.Path().absolute() / "c/block_matching.so"
+            c_lib = ctypes.CDLL(libname)
+            # Define the argument and return types for the function
+            c_lib.block_matching.argtypes = [
+                ctypes.POINTER(ctypes.c_double), # left
+                ctypes.POINTER(ctypes.c_double), # right
+                ctypes.POINTER(ctypes.c_double), # output
+                ctypes.c_int, # height
+                ctypes.c_int, # width
+                ctypes.c_int, # max disparity
+                ctypes.c_int # kernel_size
+            ]
+            c_lib.block_matching.restype = ctypes.c_void_p
+            left_ctypes = left.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            right_ctypes = right.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            out_ctypes = output.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+            height = ctypes.c_int(left.shape[0])
+            width = ctypes.c_int(left.shape[1])
+            max_disparity = ctypes.c_int(self.max_disparity)
+            kernel_size = ctypes.c_int(self.kernel_size)
+            c_lib.block_matching(left_ctypes, right_ctypes, out_ctypes, height, width, max_disparity, kernel_size)
+            output = np.ctypeslib.as_array(out_ctypes, shape=(left.shape[0], left.shape[1]))
+            return np.float32(output)
