@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-import cv2 as cv # TODO: remove this dependency
+import cv2 as cv
 
 def load_images(root):
     left = Image.open(root + "/left.png")
