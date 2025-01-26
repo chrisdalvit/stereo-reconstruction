@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <float.h>
+#include <omp.h>
 
 void block_matching(double *left, double* right, double* output, int height, int width, int max_disparity, int kernel_size, int use_subpixel) {
     int kernel_half = (int) kernel_size / 2;
+    #pragma omp parallel for
     for(int i = kernel_half; i < height-kernel_half; i++){
         for(int j = max_disparity; j < width-kernel_half; j++){
             int best_offset = -1;
@@ -14,7 +16,7 @@ void block_matching(double *left, double* right, double* output, int height, int
                 
                 for(int x = -kernel_half; x <= kernel_half; x++){
                     for(int y = -kernel_half; y <= kernel_half; y++){
-                        double diff = left[(i+x)*width + (j+y)] - right[(i+x)*width + (j+y-offset)];
+                        double diff = left[(i+y)*width + (j+x)] - right[(i+y)*width + (j+x-offset)];
                         error += diff * diff;
                     }
                 }
