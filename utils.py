@@ -47,8 +47,8 @@ def compute_metrics(pred, gt, threshold=3.0):
     mae = np.mean(abs_error)
 
     return {
-        "EPE": epe,
-        "Bad Pixel %": bad_pixels,
-        "RMSE": rmse,
-        "MAE": mae
+        "EPE": float(epe),
+        "Bad Pixel %": float(bad_pixels),
+        "RMSE": float(rmse),
+        "MAE": float(mae)
     }
