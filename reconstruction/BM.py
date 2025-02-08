@@ -3,6 +3,7 @@ import pathlib
 import numpy as np
 
 class BM:
+    """Block Matching algorithm for stereo matching"""
     
     def __init__(self, kernel_size, max_disparity, subpixel_interpolation, language):
         self.kernel_size = kernel_size
@@ -13,6 +14,7 @@ class BM:
         self.language = language
         
     def _get_window(self, y, x, img, offset=0):
+        """Get the window centered at (y, x) with the given offset"""
         y_start = y-self.kernel_half
         y_end = y+self.kernel_half
         x_start = x-self.kernel_half-offset+1
@@ -20,6 +22,7 @@ class BM:
         return img[y_start:y_end,x_start:x_end]
     
     def _compute_subpixel_offset(self, best_offset, errors):
+        """Compute subpixel offset using parabolic interpolation"""
         # Check if best_offset is not on border and if neighbors exist
         if 0 < best_offset < self.max_disparity-1 and errors[best_offset-1] and errors[best_offset+1]:
             denom = errors[best_offset-1] + errors[best_offset+1] - 2*errors[best_offset]
@@ -29,6 +32,7 @@ class BM:
         return 0.0
     
     def compute_python(self, left, right):
+        """Compute disparity map using Python"""
         h, w = left.shape
         disp_map = np.zeros_like(left, dtype=np.float32)
         for y in range(self.kernel_half, h - self.kernel_half):      
@@ -53,6 +57,7 @@ class BM:
         return disp_map
     
     def compute_c(self, left, right):
+        """Compute disparity map using C"""
         left = np.double(left)
         right = np.double(right)
         output = np.double(np.ones_like(left))
@@ -84,6 +89,7 @@ class BM:
         return np.float32(output)
 
     def compute(self, left, right):
+        """Compute disparity map"""
         if self.language == "python":
             return self.compute_python(left, right)
         elif self.language == "c":

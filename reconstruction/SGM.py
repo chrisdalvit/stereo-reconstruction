@@ -1,6 +1,7 @@
 import numpy as np
 
 class SGM:
+    """Semi-Global Matching algorithm for stereo matching"""
     
     def __init__(self, kernel_size, max_disparity, penalty1, penalty2, subpixel_interpolation, masking=True):
         self.kernel_size = kernel_size
@@ -12,6 +13,7 @@ class SGM:
         self.masking = masking
     
     def _get_patch(self, y, x, img, offset=0):
+        """Get the patch centered at (y, x) with the given offset"""
         y_start = y-self.kernel_half
         y_end = y+self.kernel_half+1
         x_start = x-self.kernel_half-offset
@@ -19,6 +21,7 @@ class SGM:
         return img[y_start:y_end, x_start:x_end]
     
     def _census_transform(self, img):
+        """Compute census transform of the image"""
         height, width = img.shape
         census_values = np.zeros_like(img, dtype=np.int32)
         for y in range(self.kernel_half, height - self.kernel_half):
@@ -31,6 +34,7 @@ class SGM:
         return census_values
     
     def _compute_costs(self, left_census_values, right_census_values):
+        """Compute matching costs using Hamming distance"""
         height, width = left_census_values.shape
         cost_volume = np.zeros(shape=(height, width, self.max_disparity), dtype=np.uint32)
         census_tmp = np.zeros_like(left_census_values, dtype=np.int32)
@@ -52,6 +56,7 @@ class SGM:
         return cost_volume
     
     def _get_path_cost(self, slice, offset, penalties, other_dim):
+        """Compute the minimum cost path for a single direction"""
         minimum_cost_path = np.zeros(shape=(other_dim, self.max_disparity), dtype=np.int32)
         minimum_cost_path[offset - 1, :] = slice[offset - 1, :]
 
@@ -73,6 +78,7 @@ class SGM:
         return minimum_cost_path 
     
     def _aggregate_costs(self, cost_volume):
+        """Aggregate costs in all directions"""
         height, width, _ = cost_volume.shape
         p2 = np.full(shape=(self.max_disparity, self.max_disparity), fill_value=self.penalty2, dtype=np.int32)
         p1 = np.full(shape=(self.max_disparity, self.max_disparity), fill_value=self.penalty1 - self.penalty2, dtype=np.int32)
@@ -107,6 +113,7 @@ class SGM:
         return aggregation_volume
     
     def _apply_subpixel_offset(self, volume, disparity):
+        """Apply subpixel offset to disparity map"""
         h, w, c = volume.shape
         for i in range(self.kernel_half, h-self.kernel_half):
             for j in range(self.kernel_half, w-self.kernel_half):
@@ -119,6 +126,7 @@ class SGM:
         return disparity
     
     def _select_disparity(self, aggregation_volume):
+        """Select disparity with minimum cost"""
         # sum up costs for all directions
         volume = np.sum(aggregation_volume, axis=3).astype(float)
         
@@ -129,6 +137,7 @@ class SGM:
         return disparity
     
     def compute(self, left, right):
+        """Compute disparity map"""
         left_census = self._census_transform(left)
         right_census = self._census_transform(right)
         cost_volume = self._compute_costs(left_census, right_census)

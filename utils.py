@@ -3,12 +3,14 @@ from PIL import Image
 import cv2 as cv
 
 def load_images(root):
+    "Load left, right and ground truth images"
     left = Image.open(root + "/left.png")
     right = Image.open(root  + "/right.png")
     gt = Image.open(root  + "/gt.png")
     return left, right, gt
 
 def save_point_cloud(filename, disparity, colors):
+    """Save a 3D point cloud to a PLY file"""
     Q = np.array([[1, 0, 0, -disparity.shape[1]/2],
                 [0, -1, 0, disparity.shape[0]/2],
                 [0, 0, 0, -0.8*disparity.shape[1]],  # focal length; adjust based on calibration
@@ -36,6 +38,7 @@ end_header
         
 
 def compute_metrics(pred, gt, threshold=3.0):
+    """Compute error metrics between predicted and ground truth disparity maps"""
     mask = gt > 0  # Consider only valid disparity values
     valid_pred = pred[mask].astype(np.float32)
     valid_gt = gt[mask].astype(np.float32)

@@ -1,6 +1,10 @@
 import argparse
 import open3d as o3d
 
+#
+# Render a point cloud from a .ply file
+#
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--file", type=str, required=True)
 
