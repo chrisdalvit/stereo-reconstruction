@@ -60,8 +60,15 @@ class BM:
         """Compute disparity map using C"""
         left = np.double(left)
         right = np.double(right)
-        output = np.double(np.ones_like(left))
+        output = np.double(np.zeros_like(left))
         # Load the shared library into ctypes
+        if not pathlib.Path("c/block_matching.so").exists():
+            print("No shared library found. Please compile the C code first.")
+            print("Run one of the following commands in the terminal:")
+            print("\tinvoke build-block-matching")
+            print("\tinvoke build-omp-block-matching")
+            print("Look into the README for more information.")
+            exit()
         libname = pathlib.Path().absolute() / "c/block_matching.so"
         c_lib = ctypes.CDLL(libname)
         # Define the argument and return types for the function
