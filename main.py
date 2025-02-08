@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 import cv2 as cv
 import matplotlib.pyplot as plt
+import os
 
 from reconstruction.BM import BM
 from reconstruction.SGM import SGM
@@ -38,5 +39,7 @@ colors = np.array(left)
 print(f"Computation time: {end-start:.2f}s")
 print(f"Metrics: {compute_metrics(disparity, np.array(gt))}")
 
+if not os.path.exists("output"):
+    os.mkdir("output")
 save_point_cloud(f"output/{args.method}_{args.language}.ply", disparity, colors)
 plt.imsave(f"output/{args.method}_{args.language}.png", disparity, cmap='jet')
