@@ -27,3 +27,8 @@ After creating the shared objects (.so files) you can run
 ```
 python main.py --method bm --language c
 ```
+
+To **visualize** the generated point cloud run 
+```
+python render.py --file output/<YOUR_PLY_FILE>
+```
