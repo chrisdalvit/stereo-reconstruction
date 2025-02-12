@@ -45,12 +45,7 @@ class SGM:
             # 1 is assigned when the bits differ and 0 when they are the same
             xor = np.bitwise_xor(left_census_values, census_tmp)
             # All the 1's are summed up to give us the number of different pixels (the cost)
-            distance = np.zeros_like(left_census_values, dtype=np.uint32)
-            while not np.all(xor == 0):
-                tmp = xor - 1
-                mask = xor != 0
-                xor[mask] &= tmp[mask]
-                distance[mask] += 1
+            distance = np.bitwise_count(xor)
             # All the costs for that disparity are added to the cost volume
             cost_volume[:, :, d] = distance
         return cost_volume
